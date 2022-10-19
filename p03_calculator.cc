@@ -1,0 +1,190 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <fstream>
+#include <stack>
+
+#include "simbolos.h"
+#include "alfabetos.h"
+#include "cadenas.h"
+#include "lenguajes.h"
+#include "algoritmoRPN.h"
+
+const char LLAVE_IZQ = '{';
+const char LLAVE_DER = '}';
+
+// Metodo que comprueba que los argumentos introducidos son correctos, además de
+// que el fichero de entrada existe. Muestra también información sobre el uso
+// del programa.
+bool ComprobacionEntrada(int& argc, char* argv[]) {
+  std::string help = "-h";
+  std::string help_ = "--help";
+  if (argc == 2) { 
+    std::string fichero_entrada1 = argv[1];
+    std::ifstream archivo_entrada1(fichero_entrada1);
+
+    if (archivo_entrada1.is_open()) {
+      return true;
+    } else {
+      std::cout << "No es posible abrir los ficheros o el opcode no es correcto." << std::endl;
+      std::cout << "Ejecute para más información: ./p01_strings --help || ./p01_strings -h" << std::endl;
+    return false;
+    }
+   } else if(argc == 2 && (argv[1] == help || argv[1] == help_)) {
+      std::cout << "Modo de ejecución: ./p01_strings filein1.txt filein2.txt fileout.txt opcode" << std::endl;
+  } else {
+    std::cout << "El número o los parámetros de entrada no son correctos." << std::endl;
+    return false;
+  }
+  return false;
+}
+
+bool CompruebaVacio(std::string& linea) {
+  std::size_t posicion_llave_izq = linea.find(LLAVE_IZQ);
+  std::size_t posicion_llave_der = linea.find(LLAVE_DER);
+  if (posicion_llave_der - posicion_llave_izq == 1) {
+    return true;
+  }
+  return false;
+}
+
+void ExtraerA(std::string linea, Alfabeto& Alfabeto) {
+  for (unsigned index = 0; index < linea.size() - 1; index++) {
+    std::string simbolo_entrada = linea.substr(index, 1);
+    if (simbolo_entrada != " " && simbolo_entrada != "{" && simbolo_entrada != "}" && simbolo_entrada != ",") {
+      Simbolo simbolo(simbolo_entrada);
+      Alfabeto.InsertarSimbolo(simbolo);
+    }
+  }
+}
+
+void ExtraerC(std::string linea, Alfabeto& Alfabeto, Lenguaje& Lenguaje) {
+  Cadena Cadena;
+  int iterador = 1;
+  while(linea != "") {
+    std::string simbolo_entrada = linea.substr(0, iterador);
+    Simbolo Simbolo(simbolo_entrada);
+    if (Simbolo == VACIA) {
+      Cadena.InsertarSimbolo(Simbolo);
+      linea.erase(0, iterador);
+    } else if (Alfabeto.BuscarSimbolo(Simbolo)) {
+      Cadena.InsertarSimbolo(Simbolo);
+      linea.erase(0, iterador);
+      iterador = 1;
+    } else {
+      iterador++;
+    }
+  }
+  Cadena.SetAlfabeto(Alfabeto);
+  Lenguaje.InsertarCadena(Cadena);
+}
+
+void VariasCadenas(std::string& linea, Alfabeto& Alfabeto, Lenguaje& Lenguaje) {
+  std::size_t posicion_espacio = linea.find(SPACE);
+  std::string cadena = linea.substr(0, posicion_espacio - 1);
+
+  ExtraerC(cadena, Alfabeto, Lenguaje);
+  linea.erase(0, posicion_espacio + 1);
+  while(linea != "") {
+    std::size_t posicion_espacio = linea.find(SPACE);
+    if (posicion_espacio == std::string::npos) {
+      std::size_t posicion_llave_der = linea.find(LLAVE_DER);
+      std::string cadena = linea.substr(0, posicion_llave_der);
+      ExtraerC(cadena, Alfabeto, Lenguaje);
+      linea.erase(0, posicion_llave_der + 1);
+    } else {
+      std::string cadena = linea.substr(0, posicion_espacio - 1);
+      ExtraerC(cadena, Alfabeto, Lenguaje);
+      linea.erase(0, posicion_espacio + 1);
+    }    
+  }
+}
+
+Lenguaje Metodo2(std::string& linea) {
+  Lenguaje Lenguaje;
+  Alfabeto Alfabeto;
+  
+  std::size_t posicion_espacio_identificador = linea.find(SPACE);
+  std::string indetificador_lenguaje = linea.substr(0, posicion_espacio_identificador);
+  Lenguaje.InsertarIdentificador(indetificador_lenguaje);
+
+  std::size_t posicion_llave1 = linea.find(LLAVE_IZQ);
+  linea.erase(0, posicion_llave1 + 1);
+  ExtraerA(linea, Alfabeto);
+
+  std::size_t posicion_espacio = linea.find(SPACE);
+  if (posicion_espacio == std::string::npos) {
+    if (!CompruebaVacio(linea)) {
+      std::size_t posicion_llave1 = linea.find(LLAVE_IZQ);
+      std::size_t posicion_llave2 = linea.find(LLAVE_DER);
+      Cadena Cadena;
+      for (unsigned index = posicion_llave1 + 1; index < posicion_llave2; index++) {
+        std::string simbolo_entrada = linea.substr(index, 1);
+        Simbolo Simbolo(simbolo_entrada);
+        Cadena.InsertarSimbolo(Simbolo);
+      }
+      Lenguaje.InsertarCadena(Cadena);
+    } // else es vacio
+  } else {
+    VariasCadenas(linea, Alfabeto, Lenguaje);
+  }
+  std::cout << "Lenguaje: " << Lenguaje << std::endl;
+  std::cout << "Alfabeto: " << Alfabeto << std::endl << std::endl;
+  return Lenguaje;
+}
+
+// Metodo que dada una linea de entrada, comprueba si contiene el alfabeto o si
+// no lo contiene y llama a los metodos correspondientes para crear el alfabeto
+// y la cadena.
+std::vector<Lenguaje> ProcesarEntradas(std::vector<std::string>& entradas) {
+  std::vector<Lenguaje> lenguajes;
+  for (unsigned int index = 0; index < entradas.size(); index++) {
+    std::string linea = entradas[index];
+    std::size_t buscar_igual = linea.find("=");
+    if (buscar_igual != std::string::npos) {
+      lenguajes.push_back(Metodo2(linea));
+    }
+  } 
+  return lenguajes;
+}
+
+std::vector<std::string> ProcesarOperaciones(std::vector<std::string>& entradas) {
+  std::vector<std::string> operaciones;
+  for (unsigned int index = 0; index < entradas.size(); index++) {
+    std::string linea = entradas[index];
+    std::size_t buscar_igual = linea.find("=");
+    if (buscar_igual == std::string::npos) {
+      operaciones.push_back(linea);
+    }
+  } 
+  return operaciones;
+}
+
+// Metodo que extrae y retorna las lineas de entrada del fichero de entrada.
+std::vector<std::string> LeerFichero(std::string fichero_entrada) {
+  std::ifstream archivo_entrada(fichero_entrada);
+  std::vector<std::string> lineas;
+  std::string linea;
+  while (std::getline(archivo_entrada, linea)) {
+    lineas.push_back(linea);
+  }
+  return lineas;
+}
+
+// Metodo principal que controla la ejecución del programa
+int main(int argc, char* argv[]) {
+  if (ComprobacionEntrada(argc, argv)) {
+    std::vector<std::string> entradas_fichero1 = LeerFichero(argv[1]);
+    std::vector<Lenguaje> lenguajes1 = ProcesarEntradas(entradas_fichero1);
+    std::vector<std::string> operaciones = ProcesarOperaciones(entradas_fichero1);
+    std::cout << "----------------------------------------" << std::endl;
+
+    for (unsigned int index = 0; index < operaciones.size(); index++) {
+      std::cout << "Operacion: " << operaciones[index] << std::endl;
+      AlgoritmoRPN AlgoritmoRPN(lenguajes1, operaciones[index]);
+      AlgoritmoRPN.Resolver();
+      std::cout << std::endl;
+    }
+  }
+  return 0;
+}

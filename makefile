@@ -6,7 +6,7 @@ F1  = simbolos
 F2  = alfabetos
 F3  = cadenas
 F4  = lenguajes
-F5  = algoritmoRPN
+F5  = calculadoraRPN
 FH  = .h
 FCC = .cc
 

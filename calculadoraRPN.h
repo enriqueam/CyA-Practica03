@@ -15,10 +15,10 @@ const std::string INVERSA = "!";
 const std::string OPERADORES_2_OP = "+|^-";
 const std::string OPERADORES_1_OP = "*!";
 
-class AlgoritmoRPN {
+class CalculadoraRPN {
   public:
-    AlgoritmoRPN();
-    AlgoritmoRPN(std::vector<Lenguaje>& lenguajes_entrada, std::string& elementos_entrada);
+    CalculadoraRPN();
+    CalculadoraRPN(std::vector<Lenguaje>& lenguajes_entrada, std::string& elementos_entrada);
 
     std::string BuscarElemento(std::string& linea_operacion);
     bool IsOperando(std::string& operacion);

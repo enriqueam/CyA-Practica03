@@ -1,14 +1,14 @@
-#include "algoritmoRPN.h"
+#include "calculadoraRPN.h"
 
-AlgoritmoRPN::AlgoritmoRPN() {}
+CalculadoraRPN::CalculadoraRPN() {}
 
-AlgoritmoRPN::AlgoritmoRPN(std::vector<Lenguaje>& lenguajes_entrada, std::string& elementos_entrada) {
+CalculadoraRPN::CalculadoraRPN(std::vector<Lenguaje>& lenguajes_entrada, std::string& elementos_entrada) {
   lenguajes_ = lenguajes_entrada;
   linea_operacion_ = elementos_entrada;
 }
 
 
-std::string AlgoritmoRPN::BuscarElemento(std::string& linea_operacion) {
+std::string CalculadoraRPN::BuscarElemento(std::string& linea_operacion) {
   std::size_t posicion_espacio = linea_operacion.find(SPACE);
   if (posicion_espacio == std::string::npos) {
     std::string elemento = linea_operacion;
@@ -21,7 +21,7 @@ std::string AlgoritmoRPN::BuscarElemento(std::string& linea_operacion) {
   }
 }
 
-bool AlgoritmoRPN::IsOperando(std::string& operacion) {
+bool CalculadoraRPN::IsOperando(std::string& operacion) {
   std::size_t buscar_operador_2 = OPERADORES_2_OP.find(operacion);
   std::size_t buscar_operador_1 = OPERADORES_1_OP.find(operacion);
 
@@ -31,7 +31,7 @@ bool AlgoritmoRPN::IsOperando(std::string& operacion) {
   return true;
 }
 
-Lenguaje AlgoritmoRPN::BuscarIdentificador(std::string& identificador) {
+Lenguaje CalculadoraRPN::BuscarIdentificador(std::string& identificador) {
   for (unsigned int index = 0; index < lenguajes_.size(); index++) {
     if (lenguajes_[index].GetIdentificador() == identificador) {
       return lenguajes_[index];
@@ -41,7 +41,7 @@ Lenguaje AlgoritmoRPN::BuscarIdentificador(std::string& identificador) {
   exit(1);
 }
 
-bool AlgoritmoRPN::Is2Operadores(std::string& operacion) {
+bool CalculadoraRPN::Is2Operadores(std::string& operacion) {
   std::size_t buscar_operador_2 = OPERADORES_2_OP.find(operacion);
   if (buscar_operador_2 != std::string::npos) {
     return true;
@@ -49,7 +49,7 @@ bool AlgoritmoRPN::Is2Operadores(std::string& operacion) {
   return false;
 }
   
-void AlgoritmoRPN::Ejectuar2OP(std::string& elemento) {
+void CalculadoraRPN::Ejectuar2OP(std::string& elemento) {
   Lenguaje lenguaje_1 = pila_.top();
   pila_.pop();
   Lenguaje lenguaje_2 = pila_.top();
@@ -73,7 +73,7 @@ void AlgoritmoRPN::Ejectuar2OP(std::string& elemento) {
   }
 }
 
-void AlgoritmoRPN::Ejectuar1OP(std::string& elemento) {
+void CalculadoraRPN::Ejectuar1OP(std::string& elemento) {
   Lenguaje lenguaje_1 = pila_.top();
   pila_.pop();
   switch (elemento[0]) {
@@ -89,7 +89,7 @@ void AlgoritmoRPN::Ejectuar1OP(std::string& elemento) {
   }
 } 
 
-void AlgoritmoRPN::Resolver() {
+void CalculadoraRPN::Resolver() {
   while (linea_operacion_ != "") {
     std::string elemento = BuscarElemento(linea_operacion_);
     if (IsOperando(elemento)) {

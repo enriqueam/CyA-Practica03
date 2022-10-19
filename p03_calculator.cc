@@ -8,7 +8,7 @@
 #include "alfabetos.h"
 #include "cadenas.h"
 #include "lenguajes.h"
-#include "algoritmoRPN.h"
+#include "calculadoraRPN.h"
 
 const char LLAVE_IZQ = '{';
 const char LLAVE_DER = '}';
@@ -39,6 +39,8 @@ bool ComprobacionEntrada(int& argc, char* argv[]) {
   return false;
 }
 
+// Métoodo que dada una linea que contiene un lenguaje, reconoce si este es
+// vacío o no.
 bool CompruebaVacio(std::string& linea) {
   std::size_t posicion_llave_izq = linea.find(LLAVE_IZQ);
   std::size_t posicion_llave_der = linea.find(LLAVE_DER);
@@ -48,7 +50,8 @@ bool CompruebaVacio(std::string& linea) {
   return false;
 }
 
-void ExtraerA(std::string linea, Alfabeto& Alfabeto) {
+// Método que dada una linea que contiene un lenguaje, extrae el alfabeto.
+void ExtraerAlfabeto(std::string linea, Alfabeto& Alfabeto) {
   for (unsigned index = 0; index < linea.size() - 1; index++) {
     std::string simbolo_entrada = linea.substr(index, 1);
     if (simbolo_entrada != " " && simbolo_entrada != "{" && simbolo_entrada != "}" && simbolo_entrada != ",") {
@@ -58,7 +61,9 @@ void ExtraerA(std::string linea, Alfabeto& Alfabeto) {
   }
 }
 
-void ExtraerC(std::string linea, Alfabeto& Alfabeto, Lenguaje& Lenguaje) {
+// Método que dada una cadena como string, la convierte en un objeto de la clase
+// Cadena y la insera al lenguaje.
+void CrearCadena(std::string linea, Alfabeto& Alfabeto, Lenguaje& Lenguaje) {
   Cadena Cadena;
   int iterador = 1;
   while(linea != "") {
@@ -79,28 +84,33 @@ void ExtraerC(std::string linea, Alfabeto& Alfabeto, Lenguaje& Lenguaje) {
   Lenguaje.InsertarCadena(Cadena);
 }
 
+// Método que dado un lenguaje que contien varias cadenas, las extrae y las
+// convierte en objetos de la clase Cadena para insertarlas en el lenguaje.
 void VariasCadenas(std::string& linea, Alfabeto& Alfabeto, Lenguaje& Lenguaje) {
   std::size_t posicion_espacio = linea.find(SPACE);
   std::string cadena = linea.substr(0, posicion_espacio - 1);
 
-  ExtraerC(cadena, Alfabeto, Lenguaje);
+  CrearCadena(cadena, Alfabeto, Lenguaje);
   linea.erase(0, posicion_espacio + 1);
   while(linea != "") {
     std::size_t posicion_espacio = linea.find(SPACE);
     if (posicion_espacio == std::string::npos) {
       std::size_t posicion_llave_der = linea.find(LLAVE_DER);
       std::string cadena = linea.substr(0, posicion_llave_der);
-      ExtraerC(cadena, Alfabeto, Lenguaje);
+      CrearCadena(cadena, Alfabeto, Lenguaje);
       linea.erase(0, posicion_llave_der + 1);
     } else {
       std::string cadena = linea.substr(0, posicion_espacio - 1);
-      ExtraerC(cadena, Alfabeto, Lenguaje);
+      CrearCadena(cadena, Alfabeto, Lenguaje);
       linea.erase(0, posicion_espacio + 1);
     }    
   }
 }
 
-Lenguaje Metodo2(std::string& linea) {
+// Método que dada una linea que contiene un lenguaje, comprueba el tamaño de
+// este y extrae el alfabeto y las cadenas. Devuelve un objeto de la clase
+// Lenguaje.
+Lenguaje CrearLenguaje(std::string& linea) {
   Lenguaje Lenguaje;
   Alfabeto Alfabeto;
   
@@ -110,11 +120,11 @@ Lenguaje Metodo2(std::string& linea) {
 
   std::size_t posicion_llave1 = linea.find(LLAVE_IZQ);
   linea.erase(0, posicion_llave1 + 1);
-  ExtraerA(linea, Alfabeto);
+  ExtraerAlfabeto(linea, Alfabeto);
 
   std::size_t posicion_espacio = linea.find(SPACE);
-  if (posicion_espacio == std::string::npos) {
-    if (!CompruebaVacio(linea)) {
+  if (posicion_espacio == std::string::npos) { // Hay una sola cadena
+    if (!CompruebaVacio(linea)) { // Es un lenguaje no vacío
       std::size_t posicion_llave1 = linea.find(LLAVE_IZQ);
       std::size_t posicion_llave2 = linea.find(LLAVE_DER);
       Cadena Cadena;
@@ -125,7 +135,7 @@ Lenguaje Metodo2(std::string& linea) {
       }
       Lenguaje.InsertarCadena(Cadena);
     } // else es vacio
-  } else {
+  } else { // Hay varias cadenas
     VariasCadenas(linea, Alfabeto, Lenguaje);
   }
   std::cout << "Lenguaje: " << Lenguaje << std::endl;
@@ -133,31 +143,20 @@ Lenguaje Metodo2(std::string& linea) {
   return Lenguaje;
 }
 
-// Metodo que dada una linea de entrada, comprueba si contiene el alfabeto o si
-// no lo contiene y llama a los metodos correspondientes para crear el alfabeto
-// y la cadena.
-std::vector<Lenguaje> ProcesarEntradas(std::vector<std::string>& entradas) {
+// Metodo que dado un conjunto de entradas, recononce las lineas que contienen lenguajes y las que tienen operaciones en nota polaca inversa. Las lineas que tienen lenguajes son procesadas en otras funciones.
+std::pair<std::vector<Lenguaje>, std::vector<std::string>> ProcesarEntradas(std::vector<std::string>& entradas) {
   std::vector<Lenguaje> lenguajes;
-  for (unsigned int index = 0; index < entradas.size(); index++) {
-    std::string linea = entradas[index];
-    std::size_t buscar_igual = linea.find("=");
-    if (buscar_igual != std::string::npos) {
-      lenguajes.push_back(Metodo2(linea));
-    }
-  } 
-  return lenguajes;
-}
-
-std::vector<std::string> ProcesarOperaciones(std::vector<std::string>& entradas) {
   std::vector<std::string> operaciones;
   for (unsigned int index = 0; index < entradas.size(); index++) {
     std::string linea = entradas[index];
     std::size_t buscar_igual = linea.find("=");
-    if (buscar_igual == std::string::npos) {
+    if (buscar_igual != std::string::npos) {
+      lenguajes.push_back(CrearLenguaje(linea));
+    } else {
       operaciones.push_back(linea);
     }
   } 
-  return operaciones;
+  return std::make_pair(lenguajes, operaciones);
 }
 
 // Metodo que extrae y retorna las lineas de entrada del fichero de entrada.
@@ -175,14 +174,12 @@ std::vector<std::string> LeerFichero(std::string fichero_entrada) {
 int main(int argc, char* argv[]) {
   if (ComprobacionEntrada(argc, argv)) {
     std::vector<std::string> entradas_fichero1 = LeerFichero(argv[1]);
-    std::vector<Lenguaje> lenguajes1 = ProcesarEntradas(entradas_fichero1);
-    std::vector<std::string> operaciones = ProcesarOperaciones(entradas_fichero1);
+    std::pair<std::vector<Lenguaje>, std::vector<std::string>> entradas = ProcesarEntradas(entradas_fichero1);
     std::cout << "----------------------------------------" << std::endl;
-
-    for (unsigned int index = 0; index < operaciones.size(); index++) {
-      std::cout << "Operacion: " << operaciones[index] << std::endl;
-      AlgoritmoRPN AlgoritmoRPN(lenguajes1, operaciones[index]);
-      AlgoritmoRPN.Resolver();
+    for (unsigned int index = 0; index < entradas.second.size(); index++) {
+      std::cout << "Operacion: " << entradas.second[index] << std::endl;
+      CalculadoraRPN CalculadoraRPN(entradas.first, entradas.second[index]);
+      CalculadoraRPN.Resolver();
       std::cout << std::endl;
     }
   }

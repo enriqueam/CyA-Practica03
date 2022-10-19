@@ -1,3 +1,15 @@
+// Universidad de La Laguna
+// Escuela Superior de Ingeniería y Tecnología
+// Grado en Ingeniería Informática
+// Asignatura: Computabilidad y Algoritmia
+// Curso: 2º
+// Práctica 3: Calculadora de lenguajes formales
+// Autor: Enrique Álvarez Mesa
+// Correo: alu0101142104@ull.es
+// Fecha: 18/10/2022
+// Archivo  calculadoraRPN.h
+//    Contiene las funciones declaradas para la clase CalculadoraRPN.
+
 #include <iostream>
 #include <stack>
 

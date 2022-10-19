@@ -3,10 +3,10 @@
 // Grado en Ingeniería Informática
 // Asignatura: Computabilidad y Algoritmia
 // Curso: 2º
-// Práctica 2: Operaciones con lenguajes
+// Práctica 3: Calculadora de lenguajes formales
 // Autor: Enrique Álvarez Mesa
 // Correo: alu0101142104@ull.es
-// Fecha: 11/10/2022
+// Fecha: 18/10/2022
 // Archivo  cadenas.h.
 //    Contiene la declaración de la clase Cadena.
 

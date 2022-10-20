@@ -13,12 +13,15 @@
 #include "calculadoraRPN.h"
 
 // Constructor
-CalculadoraRPN::CalculadoraRPN() {}
+CalculadoraRPN::CalculadoraRPN() {
+  potencia_ = 0;
+}
 
 // Constructor
 CalculadoraRPN::CalculadoraRPN(std::vector<Lenguaje>& lenguajes_entrada, std::string& elementos_entrada) {
   lenguajes_ = lenguajes_entrada;
   linea_operacion_ = elementos_entrada;
+  potencia_ = 0;
 }
 
 // 
@@ -37,6 +40,9 @@ std::string CalculadoraRPN::BuscarElemento(std::string& linea_operacion) {
 
 // Retorna true si el elemento es un operando.
 bool CalculadoraRPN::IsOperando(std::string& operacion) {
+  if (isdigit(operacion[0])) {
+    return false;
+  }
   std::size_t buscar_operador_2 = OPERADORES_2_OP.find(operacion);
   std::size_t buscar_operador_1 = OPERADORES_1_OP.find(operacion);
   if (buscar_operador_2 != std::string::npos || buscar_operador_1 != std::string::npos) {
@@ -96,7 +102,7 @@ void CalculadoraRPN::Ejectuar1OP(std::string& elemento) {
   pila_.pop();
   switch (elemento[0]) {
     case '*':
-      pila_.push(lenguaje_1.Potencia());
+      pila_.push(lenguaje_1.Potencia(potencia_));
       break;
     case '!':
       pila_.push(lenguaje_1.Inversa());
@@ -121,6 +127,10 @@ void CalculadoraRPN::Resolver() {
         } else {
           Ejectuar2OP(elemento);
         }
+      } 
+       // Si el elemento es un numero entero, leer un elemento mas y hacer la potencia
+      else if (isdigit(elemento[0])) {
+        potencia_ = std::stoi(elemento);
       } else {
         if (pila_.size() < 1) {
           std::cout << "No hay suficientes operandos para realizar la operacion" << std::endl;

@@ -44,6 +44,7 @@ class CalculadoraRPN {
     std::stack<Lenguaje> pila_;
     std::vector<Lenguaje> lenguajes_;
     std::string linea_operacion_;
+    int potencia_;
 
     Lenguaje resultado_;
 };

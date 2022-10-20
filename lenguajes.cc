@@ -159,6 +159,22 @@ Lenguaje Lenguaje::Potencia() {
   return Lenguaje_potenciado;
 }
 
+// Operacion de Potencia. Recorro el lenguaje y concateno las cadenas con si
+// mismas hasta llegar a la potencia indicada
+Lenguaje Lenguaje::Potencia(int& potencia) {
+  Lenguaje Lenguaje_potenciado;
+  Lenguaje_potenciado.alfabeto_ = alfabeto_;
+  if (potencia == 0) {
+    InsertarCadenaVacia(Lenguaje_potenciado);
+  } else {
+    Lenguaje_potenciado.lenguaje_ = lenguaje_;
+    for (int index = 0; index < potencia - 1; index++) {
+      Lenguaje_potenciado = Lenguaje_potenciado.Concatenacion(*this);
+    }
+  }
+  return Lenguaje_potenciado;
+}
+
 // Sobrecarga del operador de salida
 std::ostream& operator<<(std::ostream& os, Lenguaje& lenguaje) {
   if (lenguaje.lenguaje_.size() == 0) {

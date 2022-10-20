@@ -34,6 +34,7 @@ class Lenguaje {
     Lenguaje Diferencia(Lenguaje& lenguaje_entrada);
     Lenguaje Inversa();
     Lenguaje Potencia();
+    Lenguaje Potencia(int& potencia);
 
     Alfabeto GetAlfabeto();
 
